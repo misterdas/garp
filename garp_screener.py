@@ -144,7 +144,7 @@ print(f"Final merged data: {len(merged_df)} stocks")
 
 # Sort by 6 months return
 if not merged_df.empty:
-    merged_df = merged_df.sort_values(by=['6mth return  %'], ascending=False)
+    merged_df = merged_df.sort_values(by=['3mth return  %'], ascending=False)
 else:
     print("No data to sort. Merged DataFrame is empty.")
 
