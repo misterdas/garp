@@ -2,7 +2,7 @@ name: Daily GARP Screener
 
 on:
   schedule:
-    - cron: '0 0 * * *'  # Runs daily at midnight UTC
+    - cron: '30 23 * * 6'  # Runs every Saturday at 11:30 PM UTC (Sunday 5 AM IST)
   workflow_dispatch:  # Allows manual triggering
 
 # Add permissions to allow writing to the repository
@@ -43,7 +43,7 @@ jobs:
       run: |
         git config user.name "GitHub Actions Bot"
         git config user.email "github-actions[bot]@users.noreply.github.com"
-        git add GARP.xlsx
-        git commit -m "Update GARP.xlsx with latest data" || echo "No changes to commit"
+        git add GARP.csv
+        git commit -m "Update GARP.csv with latest data" || echo "No changes to commit"
         git push https://x-access-token:${GITHUB_TOKEN}@github.com/misterdas/garp.git
       continue-on-error: true  # Continue even if no changes are made
