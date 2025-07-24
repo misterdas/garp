@@ -24,7 +24,8 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install beautifulsoup4==4.11.2 openpyxl pandas html5lib
+        pip install beautifulsoup4==4.11.2 openpyxl pandas
+        pip install html5lib
 
     # Run the GARP screener script
     - name: Run GARP Screener
