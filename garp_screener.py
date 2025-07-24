@@ -93,7 +93,7 @@ pd.set_option("display.max_rows", None, "display.max_columns", None)
 
 # Fetch 3 month return
 print("=== Fetching 3 Month Returns ===")
-garp3_link = 'https://www.screener.in/screens/2115435/garp3months/'
+garp3_link = 'https://www.screener.in/screens/2982716/garp3months/'
 garp3_df = fetchScreenerData(garp3_link)
 if not garp3_df.empty:
     garp3_df = garp3_df[['Name', 'CMP  Rs.', '3mth return  %']]
@@ -108,7 +108,7 @@ else:
 
 # Fetch 6 month return
 print("\n=== Fetching 6 Month Returns ===")
-garp6_link = 'https://www.screener.in/screens/2115440/garp6months/'
+garp6_link = 'https://www.screener.in/screens/2982735/garp6months/'
 garp6_df = fetchScreenerData(garp6_link)
 if not garp6_df.empty:
     garp6_df = garp6_df[['Name', '6mth return  %']]
@@ -122,7 +122,7 @@ else:
 
 # Fetch 1 year return
 print("\n=== Fetching 12 Month Returns ===")
-garp12_link = 'https://www.screener.in/screens/2115445/garp12months/'
+garp12_link = 'https://www.screener.in/screens/2982726/garp12months/'
 garp12_df = fetchScreenerData(garp12_link)
 if not garp12_df.empty:
     garp12_df = garp12_df[['Name', '1Yr return  %']]
