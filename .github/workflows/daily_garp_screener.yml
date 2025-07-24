@@ -1,4 +1,4 @@
-name: Daily GARP Screener
+name: GARP Screener
 
 on:
   schedule:
