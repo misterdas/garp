@@ -148,13 +148,13 @@ if not merged_df.empty:
 else:
     print("No data to sort. Merged DataFrame is empty.")
 
-# Save final result in an excel
+# Save final result in an csv
 try:
-    merged_df.to_excel('GARP.xlsx', index=False)
-    print(f"\nData saved to: GARP.xlsx")
+    merged_df.to_csv('GARP.csv', index=False)
+    print(f"\nData saved to: GARP.csv")
 except Exception as e:
     print(f"Error saving file: {e}")
-    print("Failed to save data to GARP.xlsx")
+    print("Failed to save data to GARP.csv")
 
 print("\n=== Final Results ===")
 print(merged_df)
