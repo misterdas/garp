@@ -7,7 +7,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
-      darkMode: 'media', // Auto-detect user's theme
+      darkMode: 'media',
       theme: {
         extend: {
           colors: {
@@ -21,51 +21,62 @@
 </head>
 <body class="bg-lightBg dark:bg-darkBg text-gray-900 dark:text-gray-100 transition-colors duration-300">
 
+  <!-- Header -->
   <header class="bg-white dark:bg-gray-800 shadow p-6 mb-6">
     <h1 class="text-3xl font-bold text-center">GARP Stock Screener</h1>
     <p class="text-center text-gray-500 dark:text-gray-400 mt-2">Recently Updated Stocks From GARP Screener</p>
   </header>
 
   <main class="max-w-6xl mx-auto px-4">
-    <div id="loading" class="text-center text-lg text-gray-600 dark:text-gray-300">Loading CSV data...</div>
     
-    <div id="table-container" class="overflow-auto mt-6 hidden">
+    <!-- Main GARP Table -->
+    <div id="loading-main" class="text-center text-lg text-gray-600 dark:text-gray-300">Loading CSV data...</div>
+    <div id="main-table-container" class="overflow-auto mt-6 hidden">
       <div class="rounded-lg shadow overflow-x-auto">
         <table class="min-w-full border border-gray-300 dark:border-gray-700 divide-y divide-gray-300 dark:divide-gray-700">
-          <thead class="bg-gray-200 dark:bg-gray-700" id="table-head"></thead>
-          <tbody class="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700" id="table-body"></tbody>
+          <thead class="bg-gray-200 dark:bg-gray-700" id="main-table-head"></thead>
+          <tbody class="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700" id="main-table-body"></tbody>
         </table>
       </div>
     </div>
+
+    <!-- Rebalanced Stocks Table -->
+    <div class="mt-16">
+      <h2 class="text-2xl font-semibold text-center mb-2">Rebalanced Stocks</h2>
+      <p class="text-center text-gray-500 dark:text-gray-400 mb-4">Latest Rebalancing from GARP</p>
+      <div id="loading-rebalance" class="text-center text-lg text-gray-600 dark:text-gray-300">Loading Rebalanced Stocks...</div>
+      <div id="rebalance-table-container" class="overflow-auto hidden">
+        <div class="rounded-lg shadow overflow-x-auto">
+          <table class="min-w-full border border-gray-300 dark:border-gray-700 divide-y divide-gray-300 dark:divide-gray-700">
+            <thead class="bg-gray-200 dark:bg-gray-700" id="rebalance-table-head"></thead>
+            <tbody class="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700" id="rebalance-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
   </main>
 
   <script>
-    const csvUrl = "https://misterdas.github.io/garp/GARP.csv";
+    // CSV URLs
+    const mainCsvUrl = "https://misterdas.github.io/garp/GARP.csv";
+    const rebalanceCsvUrl = "https://misterdas.github.io/garp/GARP_rebalance.csv";
 
+    // Reusable CSV functions
     async function fetchCSV(url) {
-      try {
-        const res = await fetch(url);
-        if (!res.ok) throw new Error("Failed to fetch CSV.");
-        const text = await res.text();
-        return parseCSV(text);
-      } catch (error) {
-        document.getElementById("loading").innerText = "Error loading data.";
-        console.error(error);
-      }
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`Failed to fetch CSV from ${url}`);
+      const text = await res.text();
+      return text.trim().split("\n").map(row => row.split(","));
     }
 
-    function parseCSV(csv) {
-      const rows = csv.trim().split("\n").map(row => row.split(","));
-      return rows;
-    }
-
-    function renderTable(data) {
-      const head = document.getElementById("table-head");
-      const body = document.getElementById("table-body");
-
+    function renderTable(data, headId, bodyId) {
+      const head = document.getElementById(headId);
+      const body = document.getElementById(bodyId);
       head.innerHTML = "";
       body.innerHTML = "";
 
+      // Headers
       const headerRow = document.createElement("tr");
       data[0].forEach(col => {
         const th = document.createElement("th");
@@ -75,6 +86,7 @@
       });
       head.appendChild(headerRow);
 
+      // Data rows
       data.slice(1).forEach(row => {
         const tr = document.createElement("tr");
         tr.className = "hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors";
@@ -86,13 +98,26 @@
         });
         body.appendChild(tr);
       });
-
-      document.getElementById("loading").style.display = "none";
-      document.getElementById("table-container").classList.remove("hidden");
     }
 
-    fetchCSV(csvUrl).then(data => {
-      if (data && data.length) renderTable(data);
+    // Load main GARP Screener table
+    fetchCSV(mainCsvUrl).then(data => {
+      renderTable(data, "main-table-head", "main-table-body");
+      document.getElementById("loading-main").style.display = "none";
+      document.getElementById("main-table-container").classList.remove("hidden");
+    }).catch(err => {
+      document.getElementById("loading-main").textContent = "Error loading main data.";
+      console.error(err);
+    });
+
+    // Load Rebalanced Stocks table
+    fetchCSV(rebalanceCsvUrl).then(data => {
+      renderTable(data, "rebalance-table-head", "rebalance-table-body");
+      document.getElementById("loading-rebalance").style.display = "none";
+      document.getElementById("rebalance-table-container").classList.remove("hidden");
+    }).catch(err => {
+      document.getElementById("loading-rebalance").textContent = "Error loading rebalanced stocks.";
+      console.error(err);
     });
   </script>
 
