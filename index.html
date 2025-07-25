@@ -1,25 +1,41 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>CSV Viewer Homepage</title>
+  <title>GARP Stock Screener</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'media', // Auto-detect user's theme
+      theme: {
+        extend: {
+          colors: {
+            lightBg: '#f9fafb',
+            darkBg: '#1f2937'
+          }
+        }
+      }
+    }
+  </script>
 </head>
-<body class="bg-gray-100 text-gray-900">
+<body class="bg-lightBg dark:bg-darkBg text-gray-900 dark:text-gray-100 transition-colors duration-300">
 
-  <header class="bg-white shadow p-6 mb-6">
-    <h1 class="text-3xl font-bold text-center">Welcome to the CSV Viewer</h1>
-    <p class="text-center text-gray-500 mt-2">Displaying data from an online CSV file</p>
+  <header class="bg-white dark:bg-gray-800 shadow p-6 mb-6">
+    <h1 class="text-3xl font-bold text-center">GARP Stock Screener</h1>
+    <p class="text-center text-gray-500 dark:text-gray-400 mt-2">Recently Updated Stocks From GARP Screener</p>
   </header>
 
-  <main class="max-w-5xl mx-auto px-4">
-    <div id="loading" class="text-center text-lg text-gray-600">Loading CSV data...</div>
+  <main class="max-w-6xl mx-auto px-4">
+    <div id="loading" class="text-center text-lg text-gray-600 dark:text-gray-300">Loading CSV data...</div>
+    
     <div id="table-container" class="overflow-auto mt-6 hidden">
-      <table class="min-w-full border border-gray-300 divide-y divide-gray-300">
-        <thead class="bg-gray-200" id="table-head"></thead>
-        <tbody class="bg-white divide-y divide-gray-200" id="table-body"></tbody>
-      </table>
+      <div class="rounded-lg shadow overflow-x-auto">
+        <table class="min-w-full border border-gray-300 dark:border-gray-700 divide-y divide-gray-300 dark:divide-gray-700">
+          <thead class="bg-gray-200 dark:bg-gray-700" id="table-head"></thead>
+          <tbody class="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700" id="table-body"></tbody>
+        </table>
+      </div>
     </div>
   </main>
 
@@ -47,26 +63,24 @@
       const head = document.getElementById("table-head");
       const body = document.getElementById("table-body");
 
-      // Clear old content
       head.innerHTML = "";
       body.innerHTML = "";
 
-      // Headers
       const headerRow = document.createElement("tr");
       data[0].forEach(col => {
         const th = document.createElement("th");
-        th.className = "px-4 py-2 text-left font-semibold";
+        th.className = "px-4 py-2 text-left font-semibold text-sm text-gray-700 dark:text-gray-200";
         th.textContent = col;
         headerRow.appendChild(th);
       });
       head.appendChild(headerRow);
 
-      // Rows
       data.slice(1).forEach(row => {
         const tr = document.createElement("tr");
+        tr.className = "hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors";
         row.forEach(cell => {
           const td = document.createElement("td");
-          td.className = "px-4 py-2 whitespace-nowrap";
+          td.className = "px-4 py-2 text-sm whitespace-nowrap text-gray-800 dark:text-gray-100";
           td.textContent = cell;
           tr.appendChild(td);
         });
@@ -77,7 +91,6 @@
       document.getElementById("table-container").classList.remove("hidden");
     }
 
-    // Load CSV on page load
     fetchCSV(csvUrl).then(data => {
       if (data && data.length) renderTable(data);
     });
