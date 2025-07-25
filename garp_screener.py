@@ -174,11 +174,18 @@ if os.path.exists(previous_file):
     added = sorted(current_names - previous_names)
     removed = sorted(previous_names - current_names)
 
-    # Build dataframe without alignment
+    # Fetch CMP for added and removed stocks
+    added_cmp = current_df.set_index('Name').reindex(added)['CMP  Rs.']
+    removed_cmp = previous_df.set_index('Name').reindex(removed)['CMP  Rs.']
+
+    # Build rebalance DataFrame with CMP values
     rebalance_df = pd.DataFrame({
         'Added Stocks': pd.Series(added),
-        'Removed Stocks': pd.Series(removed)
+        'CMP Rs. (Added)': added_cmp.values,
+        'Removed Stocks': pd.Series(removed),
+        'CMP Rs. (Removed)': removed_cmp.value
     })
+
 
     # Save rebalance file
     rebalance_df.to_csv(rebalance_file, index=False)
