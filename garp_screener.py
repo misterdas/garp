@@ -25,6 +25,7 @@ X / Instagram / Telegram :  @fabtraderinc
 import time
 import pandas as pd
 from urllib.error import HTTPError
+import os
 
 def fetchScreenerData(link):
     data = pd.DataFrame()
@@ -155,6 +156,41 @@ try:
 except Exception as e:
     print(f"Error saving file: {e}")
     print("Failed to save data to GARP.csv")
+
+# File paths
+current_file = 'GARP.csv'
+previous_file = 'GARP_prev.csv'
+rebalance_file = 'GARP_rebalance.csv'
+
+# Load and compare if previous file exists
+if os.path.exists(previous_file):
+    current_df = pd.read_csv(current_file)
+    previous_df = pd.read_csv(previous_file)
+
+    current_names = set(current_df['Name'].str.strip())
+    previous_names = set(previous_df['Name'].str.strip())
+
+    # Determine added and removed
+    added = sorted(current_names - previous_names)
+    removed = sorted(previous_names - current_names)
+
+    # Build dataframe without alignment
+    rebalance_df = pd.DataFrame({
+        'Added Stocks': pd.Series(added),
+        'Removed Stocks': pd.Series(removed)
+    })
+
+    # Save rebalance file
+    rebalance_df.to_csv(rebalance_file, index=False)
+    print(f"\nRebalance data saved to: {rebalance_file}")
+
+else:
+    print(f"\n{previous_file} not found. Skipping rebalance comparison.")
+
+# Save latest data to previous file for next run
+os.replace(current_file, previous_file)
+merged_df.to_csv(current_file, index=False)
+
 
 print("\n=== Final Results ===")
 print(merged_df)
