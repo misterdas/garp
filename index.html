@@ -1,1 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CSV Viewer Homepage</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-900">
 
+  <header class="bg-white shadow p-6 mb-6">
+    <h1 class="text-3xl font-bold text-center">Welcome to the CSV Viewer</h1>
+    <p class="text-center text-gray-500 mt-2">Displaying data from an online CSV file</p>
+  </header>
+
+  <main class="max-w-5xl mx-auto px-4">
+    <div id="loading" class="text-center text-lg text-gray-600">Loading CSV data...</div>
+    <div id="table-container" class="overflow-auto mt-6 hidden">
+      <table class="min-w-full border border-gray-300 divide-y divide-gray-300">
+        <thead class="bg-gray-200" id="table-head"></thead>
+        <tbody class="bg-white divide-y divide-gray-200" id="table-body"></tbody>
+      </table>
+    </div>
+  </main>
+
+  <script>
+    const csvUrl = "https://misterdas.github.io/garp/GARP.csv";
+
+    async function fetchCSV(url) {
+      try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error("Failed to fetch CSV.");
+        const text = await res.text();
+        return parseCSV(text);
+      } catch (error) {
+        document.getElementById("loading").innerText = "Error loading data.";
+        console.error(error);
+      }
+    }
+
+    function parseCSV(csv) {
+      const rows = csv.trim().split("\n").map(row => row.split(","));
+      return rows;
+    }
+
+    function renderTable(data) {
+      const head = document.getElementById("table-head");
+      const body = document.getElementById("table-body");
+
+      // Clear old content
+      head.innerHTML = "";
+      body.innerHTML = "";
+
+      // Headers
+      const headerRow = document.createElement("tr");
+      data[0].forEach(col => {
+        const th = document.createElement("th");
+        th.className = "px-4 py-2 text-left font-semibold";
+        th.textContent = col;
+        headerRow.appendChild(th);
+      });
+      head.appendChild(headerRow);
+
+      // Rows
+      data.slice(1).forEach(row => {
+        const tr = document.createElement("tr");
+        row.forEach(cell => {
+          const td = document.createElement("td");
+          td.className = "px-4 py-2 whitespace-nowrap";
+          td.textContent = cell;
+          tr.appendChild(td);
+        });
+        body.appendChild(tr);
+      });
+
+      document.getElementById("loading").style.display = "none";
+      document.getElementById("table-container").classList.remove("hidden");
+    }
+
+    // Load CSV on page load
+    fetchCSV(csvUrl).then(data => {
+      if (data && data.length) renderTable(data);
+    });
+  </script>
+
+</body>
+</html>
