@@ -47,20 +47,14 @@ def fetchScreenerData(link):
                 
             combined_df = pd.concat(all_tables, ignore_index=True)
             
-            # Check if required columns exist
             required_columns = ['S.No.', 'Name']
             if not all(col in combined_df.columns for col in required_columns):
                 print(f"Required columns {required_columns} not found on page {current_page}")
                 break
             
-            # Remove rows where S.No. is null
-            combined_df = combined_df.drop(
-                combined_df[combined_df['S.No.'].isnull()].index)
-            
-            # Remove header rows that might appear in data
+            combined_df = combined_df.drop(combined_df[combined_df['S.No.'].isnull()].index)
             combined_df = combined_df[combined_df['S.No.'] != 'S.No.']
             
-            # If no valid data rows found, we've reached the end
             if len(combined_df) == 0:
                 print(f"No valid data found on page {current_page}. Stopping.")
                 break
@@ -68,8 +62,7 @@ def fetchScreenerData(link):
             print(f"Found {len(combined_df)} rows on page {current_page}")
             data = pd.concat([data, combined_df], axis=0, ignore_index=True)
             
-            # Check if this is the last page
-            if len(combined_df) < 25:  # Screener.in typically shows 25 rows per page
+            if len(combined_df) < 25:
                 print(f"Page {current_page} has fewer rows ({len(combined_df)}), likely the last page.")
                 break
                 
@@ -85,14 +78,14 @@ def fetchScreenerData(link):
             break
             
         current_page += 1
-        time.sleep(3)  # Be respectful to the server
+        time.sleep(3)
     
     print(f"Total rows fetched: {len(data)}")
     return data
 
-pd.set_option("display.max_rows", None, "display.max_columns", None) # type: ignore
+pd.set_option("display.max_rows", None, "display.max_columns", None)
 
-# Fetch 3 month return
+# === Fetch 3 Month Returns ===
 print("=== Fetching 3 Month Returns ===")
 garp3_link = 'https://www.screener.in/screens/2982716/garp3months/'
 garp3_df = fetchScreenerData(garp3_link)
@@ -107,7 +100,7 @@ else:
     print("No 3-month data fetched. Skipping to next step.")
     garp3_df = pd.DataFrame(columns=['Name', 'CMP  Rs.', '3mth return  %'])
 
-# Fetch 6 month return
+# === Fetch 6 Month Returns ===
 print("\n=== Fetching 6 Month Returns ===")
 garp6_link = 'https://www.screener.in/screens/2982735/garp6months/'
 garp6_df = fetchScreenerData(garp6_link)
@@ -121,7 +114,7 @@ else:
     print("No 6-month data fetched. Skipping to next step.")
     garp6_df = pd.DataFrame(columns=['Name', '6mth return  %'])
 
-# Fetch 1 year return
+# === Fetch 12 Month Returns ===
 print("\n=== Fetching 12 Month Returns ===")
 garp12_link = 'https://www.screener.in/screens/2982726/garp12months/'
 garp12_df = fetchScreenerData(garp12_link)
@@ -135,7 +128,7 @@ else:
     print("No 12-month data fetched. Skipping to next step.")
     garp12_df = pd.DataFrame(columns=['Name', '1Yr return  %'])
 
-# Merge 3 / 6 / 12 Months Returns data into a single dataset
+# === Merge All Return Data ===
 print("\n=== Merging Data ===")
 merged_df = pd.merge(garp3_df, garp6_df, on='Name', how='inner')
 merged_df = pd.merge(merged_df, garp12_df, on='Name', how='inner')
@@ -143,26 +136,21 @@ merged_df.dropna(inplace=True)
 
 print(f"Final merged data: {len(merged_df)} stocks")
 
-# Sort by 6 months return
 if not merged_df.empty:
     merged_df = merged_df.sort_values(by=['3mth return  %'], ascending=False)
-else:
-    print("No data to sort. Merged DataFrame is empty.")
 
-# Save final result in an csv
+# === Save Final CSV ===
 try:
     merged_df.to_csv('GARP.csv', index=False)
     print(f"\nData saved to: GARP.csv")
 except Exception as e:
     print(f"Error saving file: {e}")
-    print("Failed to save data to GARP.csv")
 
-# File paths
+# === Rebalance Logic ===
 current_file = 'GARP.csv'
 previous_file = 'GARP_prev.csv'
 rebalance_file = 'GARP_rebalance.csv'
 
-# Load and compare if previous file exists
 if os.path.exists(previous_file):
     current_df = pd.read_csv(current_file)
     previous_df = pd.read_csv(previous_file)
@@ -170,34 +158,30 @@ if os.path.exists(previous_file):
     current_names = set(current_df['Name'].str.strip())
     previous_names = set(previous_df['Name'].str.strip())
 
-    # Determine added and removed
     added = sorted(current_names - previous_names)
     removed = sorted(previous_names - current_names)
 
-    # Fetch CMP for added and removed stocks
     added_cmp = current_df.set_index('Name').reindex(added)['CMP  Rs.']
     removed_cmp = previous_df.set_index('Name').reindex(removed)['CMP  Rs.']
 
-    # Build rebalance DataFrame with CMP values
+    # Use reset_index to avoid ValueError
     rebalance_df = pd.DataFrame({
-        'Added Stocks': pd.Series(added),
-        'CMP Rs. (Added)': added_cmp.values,
-        'Removed Stocks': pd.Series(removed),
-        'CMP Rs. (Removed)': removed_cmp.values
+        'Added Stocks': pd.Series(added).reset_index(drop=True),
+        'CMP Rs. (Added)': added_cmp.reset_index(drop=True),
+        'Removed Stocks': pd.Series(removed).reset_index(drop=True),
+        'CMP Rs. (Removed)': removed_cmp.reset_index(drop=True)
     })
 
-
-    # Save rebalance file
     rebalance_df.to_csv(rebalance_file, index=False)
     print(f"\nRebalance data saved to: {rebalance_file}")
 
 else:
     print(f"\n{previous_file} not found. Skipping rebalance comparison.")
 
-# Save latest data to previous file for next run
+# === Final Save State ===
 os.replace(current_file, previous_file)
 merged_df.to_csv(current_file, index=False)
 
-
 print("\n=== Final Results ===")
 print(merged_df)
+                
