@@ -2,7 +2,7 @@ name: GARP Screener
 
 on:
   schedule:
-    - cron: '30 23 * * 6'  # Runs every Saturday at 11:30 PM UTC (Sunday 5 AM IST)
+    - cron: '30 23 31 12,3,6,9 *'  # Runs at 11:30 PM UTC on the 31st of Dec, Mar, Jun, Sep
   workflow_dispatch:  # Allows manual triggering
 
 permissions:
