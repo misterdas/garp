@@ -5,7 +5,6 @@ on:
     - cron: '30 23 * * 6'  # Runs every Saturday at 11:30 PM UTC (Sunday 5 AM IST)
   workflow_dispatch:  # Allows manual triggering
 
-# Add permissions to allow writing to the repository
 permissions:
   contents: write
 
@@ -18,13 +17,13 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
       with:
-        token: ${{ secrets.GITHUB_TOKEN }}  # Use GITHUB_TOKEN for checkout
+        token: ${{ secrets.GITHUB_TOKEN }}
 
     # Set up Python environment
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: '3.9'  # Specify Python 3.9 for compatibility
+        python-version: '3.9'
 
     # Install dependencies
     - name: Install dependencies
@@ -36,14 +35,14 @@ jobs:
     - name: Run GARP Screener
       run: python garp_screener.py
 
-    # Commit and push the output file (GARP.xlsx) to the repository
+    # Commit and push the output files
     - name: Commit and push output
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Pass GITHUB_TOKEN
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         git config user.name "GitHub Actions Bot"
         git config user.email "github-actions[bot]@users.noreply.github.com"
-        git add GARP.csv
-        git commit -m "Update GARP.csv with latest data" || echo "No changes to commit"
+        git add GARP.csv GARP_prev.csv GARP_rebalance.csv
+        git commit -m "Update GARP files: current, previous, and rebalance" || echo "No changes to commit"
         git push https://x-access-token:${GITHUB_TOKEN}@github.com/misterdas/garp.git
-      continue-on-error: true  # Continue even if no changes are made
+      continue-on-error: true
