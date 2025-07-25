@@ -183,7 +183,7 @@ if os.path.exists(previous_file):
         'Added Stocks': pd.Series(added),
         'CMP Rs. (Added)': added_cmp.values,
         'Removed Stocks': pd.Series(removed),
-        'CMP Rs. (Removed)': removed_cmp.value
+        'CMP Rs. (Removed)': removed_cmp.values
     })
 
 
