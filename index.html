@@ -58,10 +58,18 @@
   </main>
 
   <script>
-    // CSV URLs
-    const mainCsvUrl = "https://misterdas.github.io/garp/GARP.csv";
-    const rebalanceCsvUrl = "https://misterdas.github.io/garp/GARP_rebalance.csv";
 
+    // CSV URLs with cache busting
+    const timestamp = new Date().getTime();
+    const mainCsvUrl = `https://misterdas.github.io/garp/GARP.csv?t=${timestamp}`;
+    const rebalanceCsvUrl = `https://misterdas.github.io/garp/GARP_rebalance.csv?t=${timestamp}`;
+
+    //////
+    // CSV URLs
+    // const mainCsvUrl = "https://misterdas.github.io/garp/GARP.csv";
+    // const rebalanceCsvUrl = "https://misterdas.github.io/garp/GARP_rebalance.csv";
+    //////
+    
     // Reusable CSV functions
     async function fetchCSV(url) {
       const res = await fetch(url);
